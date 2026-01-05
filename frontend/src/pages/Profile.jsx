@@ -69,7 +69,7 @@ const Profile = () => {
 
         try {
             setLoading(true)
-            const res = await axios.put(`https://mern-blog-ha28.onrender.com/api/v1/user/profile/update`, formData, {
+            const res = await axios.put(`${import.meta.env.VITE_API_URL}/v1/user/profile/update`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
                 },
@@ -98,23 +98,28 @@ const Profile = () => {
                         <Avatar className="w-40 h-40 border-2">
                             <AvatarImage src={user?.photoUrl || userLogo} />
                         </Avatar>
-                        <h1 className='text-center font-semibold text-xl text-gray-700 dark:text-gray-300 my-3'>{user?.occupation || "Mern Stack Developer"}</h1>
-                        <div className='flex gap-4 items-center'>
-                            <Link ><FaFacebook className='w-6 h-6 text-gray-800 dark:text-gray-300' /></Link>
-                            <Link to={`${user?.linkedin}`} target="_blank"><FaLinkedin className='w-6 h-6 dark:text-gray-300 text-gray-800' /></Link>
-                            <Link to={`${user?.github}`} target="_blank"><FaGithub className='w-6 h-6 dark:text-gray-300 text-gray-800' /></Link>
-                            <Link><FaInstagram className='w-6 h-6 text-gray-800 dark:text-gray-300' /></Link>
-                        </div>
+                        {user?.occupation && (
+                            <h1 className='text-center font-semibold text-xl text-gray-700 dark:text-gray-300 my-3'>{user.occupation}</h1>
+                        )}
+                        {(user?.facebook || user?.linkedin || user?.github || user?.instagram) && (
+                            <div className='flex gap-4 items-center mt-3'>
+                                {user?.facebook && <Link to={user.facebook} target="_blank"><FaFacebook className='w-6 h-6 text-gray-800 dark:text-gray-300' /></Link>}
+                                {user?.linkedin && <Link to={user.linkedin} target="_blank"><FaLinkedin className='w-6 h-6 dark:text-gray-300 text-gray-800' /></Link>}
+                                {user?.github && <Link to={user.github} target="_blank"><FaGithub className='w-6 h-6 dark:text-gray-300 text-gray-800' /></Link>}
+                                {user?.instagram && <Link to={user.instagram} target="_blank"><FaInstagram className='w-6 h-6 text-gray-800 dark:text-gray-300' /></Link>}
+                            </div>
+                        )}
                     </div>
                     {/* info section */}
                     <div>
                         <h1 className='font-bold text-center md:text-start text-4xl mb-7'>Welcome {user?.firstName}!</h1>
                         <p className=''><span className='font-semibold'>Email : </span>{user?.email}</p>
-                        <div className='flex flex-col gap-2 items-start justify-start my-5'>
-                            <Label className="">About Me</Label>
-                            <p className='border dark:border-gray-600 p-6  rounded-lg'>{user?.bio || "I'm a passionate web developer and content creator focused on frontend technologies. When I'm not coding, you can find me writing about tech, hiking, or experimenting with new recipes."}</p>
-
-                        </div>
+                        {user?.bio && (
+                            <div className='flex flex-col gap-2 items-start justify-start my-5'>
+                                <Label className="">About Me</Label>
+                                <p className='border dark:border-gray-600 p-6 rounded-lg'>{user.bio}</p>
+                            </div>
+                        )}
 
                         <Dialog open={open} onOpenChange={setOpen} >
                             <Button onClick={() => setOpen(true)} >Edit Profile</Button>
@@ -199,6 +204,19 @@ const Profile = () => {
                                                 className="col-span-3 text-gray-500"
                                             />
                                         </div>
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="occupation" className="text-right">
+                                            Occupation
+                                        </Label>
+                                        <Input
+                                            id="occupation"
+                                            name="occupation"
+                                            value={input.occupation}
+                                            onChange={changeEventHandler}
+                                            placeholder="e.g., MERN Stack Developer"
+                                            className="col-span-3 text-gray-500"
+                                        />
                                     </div>
                                     <div>
                                         <Label htmlFor="name" className="text-right">

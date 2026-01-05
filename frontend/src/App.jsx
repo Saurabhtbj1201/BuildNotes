@@ -16,6 +16,9 @@ import Comments from './pages/Comments'
 import UpdateBlog from './pages/UpdateBlog'
 import ProtectedRoute from './components/ProtectedRoute'
 import SearchList from './pages/SearchList'
+import Achievements from './pages/Achievements'
+import AdminDashboard from './pages/AdminDashboard'
+import Setup from './pages/Setup'
 
 const router = createBrowserRouter([
   {
@@ -29,6 +32,14 @@ const router = createBrowserRouter([
   {
     path: "/about",
     element: <><Navbar/><About /><Footer/></>
+  },
+  {
+    path: "/setup",
+    element: <><Navbar/><Setup /><Footer/></>
+  },
+  {
+    path: "/admin",
+    element: <><Navbar/><ProtectedRoute><AdminDashboard /></ProtectedRoute></>
   },
   {
     path: "/search",
@@ -78,6 +89,14 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element:<Profile/>
+      },
+      {
+        path: "achievements",
+        element:<Achievements/>
+      },
+      {
+        path: "admin",
+        element:<AdminDashboard/>
       },
       
       

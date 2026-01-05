@@ -12,21 +12,11 @@ import userLogo from "../assets/user.jpg"
 import { HiMenuAlt1, HiMenuAlt3 } from "react-icons/hi";
 import {
     ChartColumnBig,
-    Cloud,
-    CreditCard,
-    Github,
-    Keyboard,
-    LifeBuoy,
     LogOut,
-    Mail,
-    MessageSquare,
-    Plus,
-    PlusCircle,
     Search,
     Settings,
+    ShieldCheck,
     User,
-    UserPlus,
-    Users,
 } from "lucide-react"
 
 import {
@@ -56,7 +46,7 @@ const Navbar = () => {
     const logoutHandler = async (e) => {
 
         try {
-            const res = await axios.get(`https://mern-blog-ha28.onrender.com/api/v1/user/logout`, { withCredentials: true });
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/v1/user/logout`, { withCredentials: true });
             if (res.data.success) {
                 navigate("/")
                 dispatch(setUser(null))
@@ -88,7 +78,7 @@ const Navbar = () => {
                     <Link to={'/'}>
                         <div className='flex gap-2 items-center'>
                             <img src={Logo} alt="" className='w-7 h-7 md:w-10 md:h-10 dark:invert' />
-                            <h1 className='font-bold text-3xl md:text-4xl'>Logo</h1>
+                            <h1 className='font-bold text-3xl md:text-4xl'>BuildNotes</h1>
                         </div>
                     </Link>
                     <div className='relative hidden md:block'>
@@ -110,21 +100,24 @@ const Navbar = () => {
                         {/* <NavLink to={'/write-blog'} className={`cursor-pointer`}><li>Write a Blog</li></NavLink> */}
                     </ul>
                     <div className='flex'>
-                        <Button onClick={() => dispatch(toggleTheme())} className="">
+                        <Button onClick={() => dispatch(toggleTheme())} variant="ghost" className="hover:bg-transparent">
                             {
                                 theme === 'light' ? <FaMoon /> : <FaSun />
                             }
-
                         </Button>
                         {
                             user ? <div className="ml-7 flex gap-3 items-center">
-                                {/* <Link to={'/profile'}> */}
                                 <DropdownMenu className="">
                                     <DropdownMenuTrigger asChild>
-                                        <Avatar className="cursor-pointer">
-                                            <AvatarImage src={user.photoUrl || userLogo} />
-                                            <AvatarFallback>CN</AvatarFallback>
-                                        </Avatar>
+                                        <div className="flex items-center gap-2 cursor-pointer">
+                                            <Avatar className="h-9 w-9">
+                                                <AvatarImage src={user.photoUrl || userLogo} />
+                                                <AvatarFallback>{user?.firstName?.[0]}{user?.lastName?.[0]}</AvatarFallback>
+                                            </Avatar>
+                                            <span className="hidden md:block font-medium">
+                                                {user?.firstName} {user?.lastName}
+                                            </span>
+                                        </div>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-56 dark:bg-gray-800">
                                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -150,7 +143,24 @@ const Navbar = () => {
                                                 <span>Write Blog</span>
                                                 <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                                             </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => navigate('/dashboard/achievements')}>
+                                                <Settings />
+                                                <span>Achievements</span>
+                                                <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
+                                            </DropdownMenuItem>
                                         </DropdownMenuGroup>
+                                        {user?.role === 'admin' && (
+                                            <>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuGroup>
+                                                    <DropdownMenuItem onClick={() => navigate('/dashboard/admin')}>
+                                                        <ShieldCheck />
+                                                        <span>Admin Panel</span>
+                                                        <DropdownMenuShortcut>⌘X</DropdownMenuShortcut>
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuGroup>
+                                            </>
+                                        )}
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={logoutHandler}>
                                             <LogOut />
@@ -159,8 +169,6 @@ const Navbar = () => {
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
-                                {/* </Link> */}
-                                <Button className="hidden md:block" onClick={logoutHandler}>Logout</Button>
                             </div> : <div className='ml-7 md:flex gap-2 '>
                                 <Link to={'/login'}><Button>Login</Button></Link>
                                 <Link className='hidden md:block' to={'/signup'}><Button>Signup</Button></Link>

@@ -125,9 +125,6 @@ export const updateProfile = async(req, res) => {
         const {firstName, lastName, occupation, bio, instagram, facebook, linkedin, github} = req.body;
         const file = req.file;
 
-        const fileUri = getDataUri(file)
-        let cloudResponse = await cloudinary.uploader.upload(fileUri)
-
         const user = await User.findById(userId).select("-password")
         
         if(!user){
@@ -146,7 +143,13 @@ export const updateProfile = async(req, res) => {
         if(linkedin) user.linkedin = linkedin
         if(github) user.github = github
         if(bio) user.bio = bio
-        if(file) user.photoUrl = cloudResponse.secure_url
+        
+        // Only upload to cloudinary if a file is provided
+        if(file) {
+            const fileUri = getDataUri(file)
+            const cloudResponse = await cloudinary.uploader.upload(fileUri)
+            user.photoUrl = cloudResponse.secure_url
+        }
 
         await user.save()
         return res.status(200).json({
@@ -181,3 +184,45 @@ export const getAllUsers = async (req, res) => {
       });
     }
   };
+
+// Get user profile with badges and milestones
+export const getUserProfile = async (req, res) => {
+    try {
+        const userId = req.params.userId || req.id;
+
+        const user = await User.findById(userId)
+            .select('-password')
+            .populate({
+                path: 'badges',
+                populate: {
+                    path: 'badgeId',
+                    select: 'name emoji description type'
+                }
+            })
+            .populate({
+                path: 'milestones',
+                populate: {
+                    path: 'milestoneId',
+                    select: 'name emoji description type targetValue'
+                }
+            });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch user profile"
+        });
+    }
+};

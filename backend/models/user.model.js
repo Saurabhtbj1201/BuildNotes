@@ -33,6 +33,21 @@ const userSchema = new mongoose.Schema({
     linkedin: { type: String, default: "" },
     github: { type: String, default: "" },
     facebook: { type: String, default: "" },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
+    },
+    badges: [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserBadge' }],
+    milestones: [{ type: mongoose.Schema.Types.ObjectId, ref: 'UserMilestone' }],
+    statistics: {
+        totalBlogs: { type: Number, default: 0 },
+        totalViews: { type: Number, default: 0 },
+        totalComments: { type: Number, default: 0 },
+        totalLikes: { type: Number, default: 0 },
+        postingStreak: { type: Number, default: 0 },
+        lastPostDate: { type: Date }
+    }
 
 
 }, { timestamps: true })

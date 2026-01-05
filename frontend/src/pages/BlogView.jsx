@@ -14,7 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Bookmark, Heart, MessageSquare, Share2 } from 'lucide-react'
+import { Bookmark, Heart, MessageSquare, Share2, Eye } from 'lucide-react'
 import CommentBox from '@/components/CommentBox'
 import axios from 'axios'
 import { FaHeart, FaRegHeart } from 'react-icons/fa6'
@@ -30,13 +30,51 @@ const BlogView = () => {
     const [blogLike, setBlogLike] = useState(selectedBlog?.likes.length)
     const { comment } = useSelector(store => store.comment)
     const [liked, setLiked] = useState(selectedBlog?.likes.includes(user?._id) || false);
+    const [views, setViews] = useState(selectedBlog?.views || 0);
+    const [authorBadges, setAuthorBadges] = useState([]);
     const dispatch = useDispatch()
     console.log(selectedBlog);
+
+    useEffect(() => {
+        // Track view when component mounts
+        trackView();
+        // Fetch author badges
+        fetchAuthorBadges();
+    }, [blogId]);
+
+    const trackView = async () => {
+        try {
+            const res = await axios.post(
+                `${import.meta.env.VITE_API_URL}/v1/blog/${blogId}/track-view`,
+                {},
+                { withCredentials: true }
+            );
+            if (res.data.success) {
+                setViews(res.data.views);
+            }
+        } catch (error) {
+            console.log('Error tracking view:', error);
+        }
+    };
+
+    const fetchAuthorBadges = async () => {
+        try {
+            const res = await axios.get(
+                `${import.meta.env.VITE_API_URL}/v1/badge/user/${selectedBlog?.author._id}`,
+                { withCredentials: true }
+            );
+            if (res.data.success) {
+                setAuthorBadges(res.data.badges.slice(0, 3)); // Show top 3 badges
+            }
+        } catch (error) {
+            console.log('Error fetching badges:', error);
+        }
+    };
 
     const likeOrDislikeHandler = async () => {
         try {
             const action = liked ? 'dislike' : 'like';
-            const res = await axios.get(`https://mern-blog-ha28.onrender.com/api/v1/blog/${selectedBlog?._id}/${action}`, { withCredentials: true })
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/v1/blog/${selectedBlog?._id}/${action}`, { withCredentials: true })
             if (res.data.success) {
                 const updatedLikes = liked ? blogLike - 1 : blogLike + 1;
                 setBlogLike(updatedLikes);
@@ -129,9 +167,24 @@ const BlogView = () => {
                             <div>
                                 <p className="font-medium">{selectedBlog.author.firstName} {selectedBlog.author.lastName}</p>
                                 <p className="text-sm text-muted-foreground">{selectedBlog.author.occupation}</p>
+                                {authorBadges.length > 0 && (
+                                    <div className="flex gap-1 mt-1">
+                                        {authorBadges.map((badge) => (
+                                            <span key={badge._id} title={badge.badgeId.description} className="text-lg">
+                                                {badge.badgeId.emoji}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <div className="text-sm text-muted-foreground">Published on {changeTimeFormat(selectedBlog.createdAt)} • 8 min read</div>
+                        <div className="text-sm text-muted-foreground">
+                            <div>Published on {changeTimeFormat(selectedBlog.createdAt)}</div>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Eye className="h-4 w-4" />
+                                <span>{views} views</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

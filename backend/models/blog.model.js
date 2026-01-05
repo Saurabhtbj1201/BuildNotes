@@ -13,6 +13,10 @@ const blogSchema = new mongoose.Schema({
         type: String,
         // required:true
     },
+    summary: {
+        type: String,
+        default: ""
+    },
     thumbnail: {
         type: String,
     },
@@ -26,6 +30,11 @@ const blogSchema = new mongoose.Schema({
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+    views: {
+        type: Number,
+        default: 0
+    },
+    viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     isPublished:{
         type:Boolean,
         default:false

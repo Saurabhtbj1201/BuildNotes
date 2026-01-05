@@ -4,11 +4,20 @@ import connectDB from "./database/db.js"
 import userRoute from "./routes/user.route.js"
 import blogRoute from "./routes/blog.route.js"
 import commentRoute from "./routes/comment.route.js"
+import badgeRoute from "./routes/badge.route.js"
+import milestoneRoute from "./routes/milestone.route.js"
+import adminRoute from "./routes/admin.route.js"
+import categoryRoute from "./routes/category.route.js"
+import newsletterRoute from "./routes/newsletter.route.js"
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import path from "path"
+import { fileURLToPath } from 'url';
 
-dotenv.config()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') })
 const app = express()
 
 const PORT = process.env.PORT || 3000
@@ -19,20 +28,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}));
 app.use(cors({
-    origin: "https://mern-blog-ha28.onrender.com",
+    origin: process.env.FRONTEND_URL,
     credentials:true
 }))
-
-const _dirname = path.resolve()
 
 // apis
  app.use("/api/v1/user", userRoute)
  app.use("/api/v1/blog", blogRoute)
  app.use("/api/v1/comment", commentRoute)
+ app.use("/api/v1/badge", badgeRoute)
+ app.use("/api/v1/milestone", milestoneRoute)
+ app.use("/api/v1/admin", adminRoute)
+ app.use("/api/v1/category", categoryRoute)
+ app.use("/api/v1/newsletter", newsletterRoute)
 
- app.use(express.static(path.join(_dirname,"/frontend/dist")));
+ app.use(express.static(path.join(__dirname, "../frontend/dist")));
  app.get("*", (_, res)=>{
-    res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"))
+    res.sendFile(path.resolve(__dirname, "..", "frontend", "dist", "index.html"))
  });
 
 app.listen(PORT, ()=>{

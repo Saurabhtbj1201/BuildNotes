@@ -9,11 +9,12 @@ const TotalProperty = () => {
     const { blog } = useSelector(store => store.blog)
     const [totalComments, setTotalComments] = useState(0)
     const [totalLikes, setTotalLikes] = useState(0)
+    const [totalViews, setTotalViews] = useState(0)
     const dispatch = useDispatch()
 
     const getOwnBlog = async () => {
         try {
-            const res = await axios.get(`https://mern-blog-ha28.onrender.com/api/v1/blog/get-own-blogs`, { withCredentials: true })
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/v1/blog/get-own-blogs`, { withCredentials: true })
             if (res.data.success) {
                 dispatch(setBlog(res.data.blogs))
             }
@@ -24,7 +25,7 @@ const TotalProperty = () => {
     }
     const getTotalComments = async()=>{
         try {
-          const res = await axios.get(`https://mern-blog-ha28.onrender.com/api/v1/comment/my-blogs/comments`,{withCredentials:true})
+          const res = await axios.get(`${import.meta.env.VITE_API_URL}/v1/comment/my-blogs/comments`,{withCredentials:true})
           if(res.data.success){
              setTotalComments(res.data.totalComments)
           }
@@ -36,7 +37,7 @@ const TotalProperty = () => {
 
     const getTotalLikes = async()=>{
       try {
-        const res = await axios.get(`https://mern-blog-ha28.onrender.com/api/v1/blog/my-blogs/likes`,{withCredentials:true})
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/v1/blog/my-blogs/likes`,{withCredentials:true})
         if(res.data.success){
            setTotalLikes(res.data.totalLikes)
         }
@@ -45,16 +46,30 @@ const TotalProperty = () => {
         
       }
     }
+
+    const getTotalViews = async()=>{
+      try {
+        const totalViewsCount = blog.reduce((sum, b) => sum + (b.views || 0), 0)
+        setTotalViews(totalViewsCount)
+      } catch (error) {
+       console.log(error);
+      }
+    }
+
     useEffect(()=>{
         getOwnBlog()
         getTotalComments()
         getTotalLikes()
     },[])
 
+    useEffect(()=>{
+        getTotalViews()
+    },[blog])
+
     const stats = [
         {
           title: "Total Views",
-          value: "24.8K",
+          value: totalViews,
           icon: Eye,
           change: "+12%",
           trend: "up",

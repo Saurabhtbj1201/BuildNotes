@@ -1,7 +1,36 @@
 import { Blog } from "../models/blog.model.js";
+import { User } from "../models/user.model.js";
 import Comment from "../models/comment.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
+import { checkAndAwardBadges, updateUserStatistics } from "./badge.controller.js";
+import { checkAndUpdateMilestones } from "./milestone.controller.js";
+
+// Helper function to generate summary from description
+const generateSummary = (description, maxLength = 150) => {
+    if (!description) return "";
+    
+    // Remove HTML tags
+    const cleanText = description.replace(/<[^>]*>/g, ' ');
+    
+    // Remove extra whitespace
+    const normalized = cleanText.replace(/\s+/g, ' ').trim();
+    
+    if (normalized.length <= maxLength) return normalized;
+    
+    // Cut at last complete sentence or word within limit
+    const truncated = normalized.substring(0, maxLength);
+    const lastPeriod = truncated.lastIndexOf('.');
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    if (lastPeriod > maxLength - 50) {
+        return truncated.substring(0, lastPeriod + 1);
+    } else if (lastSpace > 0) {
+        return truncated.substring(0, lastSpace) + '...';
+    }
+    
+    return truncated + '...';
+};
 
 // Create a new blog post
 export const createBlog = async (req,res) => {
@@ -50,8 +79,18 @@ export const updateBlog = async (req, res) => {
             thumbnail = await cloudinary.uploader.upload(fileUri)
         }
 
-        const updateData = {title, subtitle, description, category,author: req.id, thumbnail: thumbnail?.secure_url};
+        // Generate summary from description
+        const summary = generateSummary(description);
+
+        const updateData = {title, subtitle, description, summary, category,author: req.id, thumbnail: thumbnail?.secure_url};
         blog = await Blog.findByIdAndUpdate(blogId, updateData, {new:true});
+
+        // Check for badges and milestones if blog is published
+        if (blog.isPublished) {
+            await updateUserStatistics(req.id);
+            await checkAndAwardBadges(req.id);
+            await checkAndUpdateMilestones(req.id);
+        }
 
         res.status(200).json({ success: true, message: "Blog updated successfully", blog });
     } catch (error) {
@@ -121,6 +160,19 @@ export const togglePublishBlog = async (req,res) => {
         blog.isPublished = !blog.isPublished
         await blog.save();
 
+        // Update user statistics and check for badges/milestones
+        if (blog.isPublished) {
+            console.log('Blog published, checking badges for user:', blog.author);
+            try {
+                await updateUserStatistics(blog.author);
+                await checkAndAwardBadges(blog.author);
+                await checkAndUpdateMilestones(blog.author);
+                console.log('Badge and milestone check completed');
+            } catch (badgeError) {
+                console.error('Error checking badges/milestones:', badgeError);
+            }
+        }
+
         const statusMessage = blog.isPublished ? "Published" : "Unpublished";
         return res.status(200).json({
             success:true,
@@ -183,6 +235,14 @@ export const deleteBlog = async (req, res) => {
         // Delete related comments
         await Comment.deleteMany({ postId: blogId });
 
+        // Update user statistics and recheck milestones after deletion
+        try {
+            await updateUserStatistics(authorId);
+            await checkAndUpdateMilestones(authorId);
+            console.log('Statistics and milestones updated after blog deletion');
+        } catch (updateError) {
+            console.error('Error updating statistics after deletion:', updateError);
+        }
 
         res.status(200).json({ success: true, message: "Blog deleted successfully" });
     } catch (error) {
@@ -204,6 +264,10 @@ export const likeBlog = async (req, res) => {
         await blog.updateOne({ $addToSet: { likes: likeKrneWalaUserKiId } });
         await blog.save();
 
+        // Update author statistics and check badges/milestones
+        await updateUserStatistics(blog.author);
+        await checkAndAwardBadges(blog.author);
+        await checkAndUpdateMilestones(blog.author);
 
         return res.status(200).json({ message: 'Blog liked', blog, success: true });
     } catch (error) {
@@ -254,3 +318,90 @@ export const getMyTotalBlogLikes = async (req, res) => {
       });
     }
   };
+
+// Track blog view
+export const trackBlogView = async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        const userId = req.id; // Can be undefined for non-authenticated users
+
+        // Build atomic update operations
+        const updateOps = {
+            $inc: { views: 1 }
+        };
+
+        // Add unique viewer if authenticated and not already viewed
+        if (userId) {
+            updateOps.$addToSet = { viewedBy: userId };
+        }
+
+        // Use atomic update to avoid version conflicts
+        const blog = await Blog.findByIdAndUpdate(
+            blogId,
+            updateOps,
+            { new: true }
+        );
+
+        if (!blog) {
+            return res.status(404).json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
+        // Update author statistics and check milestones
+        await updateUserStatistics(blog.author);
+        await checkAndAwardBadges(blog.author);
+        await checkAndUpdateMilestones(blog.author);
+
+        res.status(200).json({
+            success: true,
+            views: blog.views
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to track view"
+        });
+    }
+};
+
+// Get blog by ID with full details
+export const getBlogById = async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        
+        const blog = await Blog.findById(blogId)
+            .populate({
+                path: 'author',
+                select: 'firstName lastName photoUrl bio occupation badges'
+            })
+            .populate({
+                path: 'comments',
+                sort: { createdAt: -1 },
+                populate: {
+                    path: 'userId',
+                    select: 'firstName lastName photoUrl'
+                }
+            });
+
+        if (!blog) {
+            return res.status(404).json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            blog
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch blog"
+        });
+    }
+};
