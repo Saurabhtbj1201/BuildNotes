@@ -314,6 +314,23 @@ This project represents my commitment to leveraging modern technologies to strea
 
 <div align="center">
 
+
+
+---
+
+### © Made with ❤️ by Saurabh Kumar. All Rights Reserved 2025
+
+<!-- Profile Section with Photo and Follow Button -->
+<a href="https://github.com/Saurabhtbj1201">
+  <img src="https://github.com/Saurabhtbj1201.png" width="100" style="border-radius: 50%; border: 3px solid #0366d6;" alt="Saurabh Profile"/>
+</a>
+
+### [Saurabh Kumar](https://github.com/Saurabhtbj1201)
+
+<a href="https://github.com/Saurabhtbj1201">
+  <img src="https://img.shields.io/github/followers/Saurabhtbj1201?label=Follow&style=social" alt="GitHub Follow"/>
+</a>
+
 ### 🔗 Connect With Me
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/saurabhtbj1201)
@@ -330,6 +347,9 @@ This project represents my commitment to leveraging modern technologies to strea
   <br>
   ⭐ Star this repo if you find it helpful!
 </p>
+
+![Profile Views](https://komarev.com/ghpvc/?username=Saurabhtbj1201&color=blue&style=for-the-badge&label=PROFILE+VIEWS)
+![Repo Views](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FSaurabhtbj1201%2FBuildNotes&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=REPO+VIEWS&edge_flat=false)
 
 </div>
 
