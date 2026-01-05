@@ -19,6 +19,7 @@ import SearchList from './pages/SearchList'
 import Achievements from './pages/Achievements'
 import AdminDashboard from './pages/AdminDashboard'
 import Setup from './pages/Setup'
+import { Analytics } from "@vercel/analytics/react"
 
 const router = createBrowserRouter([
   {
@@ -116,6 +117,7 @@ const App = () => {
   return (
     <>
       <RouterProvider router={router} />
+      <Analytics />
     </>
   )
 }

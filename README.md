@@ -272,7 +272,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/yourusername/MERN-Blog.git
+   git clone https://github.com/Saurabhtbj1201/BuildNotes.git
    ```
 
 2. **Create your feature branch**
@@ -302,8 +302,6 @@ This project is open source and available under the **MIT License**.
 
 ## 👨‍💻 About Me
 
-<div align="center">
-
 ### Hi! I'm **Saurabh Kumar** 👋
 
 *A passionate developer focused on automation, AI, and building scalable solutions for real-world problems.*
@@ -313,6 +311,8 @@ This project represents my commitment to leveraging modern technologies to strea
 ### 💼 Skills
 
 `Full-Stack Development` • `MERN Stack` • `API Integration` • `Cloud Services` • `UI/UX Design` • `Database Management` • `DevOps` • `AI & Automation`
+
+<div align="center">
 
 ### 🔗 Connect With Me
 
